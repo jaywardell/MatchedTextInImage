@@ -19,8 +19,8 @@ struct ImageWithHighlightedText: View {
     @State private var textRegions: [TextFromImageReader.TextRegion] = []
     
     init(image: CGImage,
-        highlighted: String,
-        highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void) {
+         highlighted: String,
+         highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void = Self.defaultHighlight) {
         self.image = image
         self.highlighted = highlighted
         self.highlight = highlight
