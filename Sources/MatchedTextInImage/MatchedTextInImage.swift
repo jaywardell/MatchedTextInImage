@@ -1,2 +1,8 @@
-// The Swift Programming Language
-// https://docs.swift.org/swift-book
+//
+//  File.swift
+//  MatchedTextInImage
+//
+//  Created by Joseph Wardell on 1/8/25.
+//
+
+import Foundation
