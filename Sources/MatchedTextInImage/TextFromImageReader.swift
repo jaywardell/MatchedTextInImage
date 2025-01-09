@@ -15,70 +15,26 @@ extension CGImage {
 
 public actor TextFromImageReader {
     let image: CGImage
-    private(set) var observations: [VNRecognizedTextObservation]?
+    private(set) var observations: [TextRegion]?
+    
     public init(image: CGImage) {
         self.image = image
     }
         
-    private func retrieveObservations() async throws -> [VNRecognizedTextObservation] {
-        if let observations { return observations }
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            
-            let request = VNRecognizeTextRequest { [weak self] received, error in
-                Task {
-                    await self?.process(results: received, error: error, continuation: continuation)
-                }
-            }
-
-            Task {
-                do {
-                    let handler = VNImageRequestHandler(cgImage: image, options: [:])
-                    try handler.perform([request])
-                }
-                catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-    }
-    
-    private func process(
-        results received: VNRequest,
-        error: Swift.Error?,
-        continuation:  CheckedContinuation<[VNRecognizedTextObservation], any Swift.Error>
-    ) {
-        
-        // make sure there were no errors
-        if let error { return continuation.resume(throwing: error) }
-                                
-        let obs = received.results as? [VNRecognizedTextObservation] ?? []
-        self.observations = received.results as? [VNRecognizedTextObservation] ?? []
-        
-        continuation.resume(returning: obs)
-
-    }
-    
-    func observations(withConfidence confidenceThreshold: Double = 0.5) async throws -> [String] {
-        try await retrieveObservations()
-            .compactMap { $0.topCandidates(1).first }
-            // TODO: this can probably be switched for a slight optimization
-            .filter { $0.confidence >= VNConfidence(confidenceThreshold) }
-            .map(\.string)
-    }
-
-    public struct TextRegion: Identifiable {
+    public struct TextRegion: Identifiable, Sendable {
         public let string: String
         public let rect: CGRect
+        public let confidence: Double
         
         public var id: String {
             string + rect.debugDescription
         }
         
         init?(observation: VNRecognizedTextObservation, in size: CGSize) {
-            guard let string = observation.topCandidates(1).first?.string else { return nil }
+            guard let text = observation.topCandidates(1).first else { return nil }
  
-            self.string = string
+            self.string = text.string
+            self.confidence = Double(text.confidence)
             
             self.rect = CGRect(
                 origin: CGPoint(
@@ -93,14 +49,45 @@ public actor TextFromImageReader {
 
         }
     }
-    public func mappedObservations(withConfidence confidenceThreshold: Double = 0.5) async throws -> [TextRegion] {
-        try await retrieveObservations()
-            .filter { $0.confidence >= VNConfidence(confidenceThreshold) }
-            .compactMap { TextRegion.init(observation: $0, in: image.size) }
-    }
     
+    private func retrieveObservations() async throws -> [TextRegion] {
+        if let observations { return observations }
+        
+        let obs: [TextRegion] = try await withCheckedThrowingContinuation { continuation in
+            
+            let request = VNRecognizeTextRequest { [image = self.image] received, error in
+                // make sure there were no errors
+                if let error { return continuation.resume(throwing: error) }
+                
+                let obs = (received.results as? [VNRecognizedTextObservation] ?? [])
+                    .compactMap { TextRegion.init(observation: $0, in: image.size) }
+                
+                continuation.resume(returning: obs)
+            }
+
+            Task {
+                do {
+                    let handler = VNImageRequestHandler(cgImage: image, options: [:])
+                    try handler.perform([request])
+                }
+                catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+        self.observations = obs
+        
+        return obs
+    }
+            
+    public func observations(withConfidence confidenceThreshold: Double = 0.5) async throws -> [TextRegion] {
+        try await retrieveObservations()
+            .filter { $0.confidence >= confidenceThreshold }
+    }
+
     public func text(withConfidence confidenceThreshold: Double = 0.5, separator: String = "") async throws -> String {
         try await observations(withConfidence: confidenceThreshold)
+            .map(\TextRegion.string)
             .joined(separator: separator)
     }
 }

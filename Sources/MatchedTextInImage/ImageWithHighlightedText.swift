@@ -97,7 +97,7 @@ struct ImageWithHighlightedText: View {
                 do {
                     let reader = TextFromImageReader(image: image)
                     self.foundText = try await reader.text(separator: "\n").components(separatedBy: "\n")
-                    self.textRegions = try await reader.mappedObservations()
+                    self.textRegions = try await reader.observations()
                 }
                 catch {
                     print("Error pulling text from image")
