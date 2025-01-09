@@ -126,7 +126,7 @@ extension ImageWithHighlightedText {
           highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void) {
         guard let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         self.image = cgImage
-        self.highlight = highlight
+        self.highlighted = highlighted
         self.highlight = highlight
     }
     #elseif canImport(UIKit)
