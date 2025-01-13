@@ -16,7 +16,7 @@ struct ImageWithHighlightedText: View {
                     _ imageSize: CGSize) -> Void
         
     @State private var foundText = [String]()
-    @State private var textRegions: [TextFromImageReader.TextRegion] = []
+    @State private var textRegions: [TextFromImageReader.TextRegion]?
     
     init(image: CGImage,
          highlighted: String,
@@ -26,8 +26,8 @@ struct ImageWithHighlightedText: View {
         self.obscure = highlight
     }
     
-    private var matchingTextRegions: [TextFromImageReader.TextRegion] {
-        textRegions.filter { region in
+    private var matchingTextRegions: [TextFromImageReader.TextRegion]? {
+        textRegions?.filter { region in
             // we want to be very lenient in how we match
             // the string that the user is searching for
             // since the instance of the filter
@@ -71,7 +71,7 @@ struct ImageWithHighlightedText: View {
                 backgroundContext.draw(swiftUIImage, in: targetRect)
             }
                         
-            for region in matchingTextRegions {
+            for region in matchingTextRegions ?? [] {
                 let toclip = outsetRect(for: region)
                 var maskedContext = context
 
@@ -92,18 +92,33 @@ struct ImageWithHighlightedText: View {
         results
             .accessibilityLabel("Image")
             .accessibilityValue(foundText.joined(separator: " "))
-            .task(priority: .background) {
-                guard foundText.isEmpty else { return }
-                do {
-                    let reader = TextFromImageReader(image: image)
-                    self.foundText = try await reader.text(separator: "\n").components(separatedBy: "\n")
-                    self.textRegions = try await reader.observations()
-                }
-                catch {
-                    print("Error pulling text from image")
-                    print(error.localizedDescription)
-                }
-            }
+//            .task(priority: .background) {
+//                guard foundText.isEmpty else { return }
+//                do {
+//                    let reader = TextFromImageReader(image: image)
+//                    self.foundText = try await reader.text(separator: "\n").components(separatedBy: "\n")
+//                    self.textRegions = try await reader.observations()
+//                }
+//                catch {
+//                    print("Error pulling text from image")
+//                    print(error.localizedDescription)
+//                }
+//            }
+            .task(priority: .background, findText)
+    }
+    
+    private func findText() async {
+//        guard foundText.isEmpty else { return }
+        guard nil == textRegions else { return }
+        do {
+            let reader = TextFromImageReader(image: image)
+            self.foundText = try await reader.text(separator: "\n").components(separatedBy: "\n")
+            self.textRegions = try await reader.observations()
+        }
+        catch {
+            print("Error pulling text from image")
+            print(error.localizedDescription)
+        }
     }
 }
 
