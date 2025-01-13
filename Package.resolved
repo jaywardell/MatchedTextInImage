@@ -1,0 +1,24 @@
+{
+  "originHash" : "19e2135ecc0ccc2cb027b077b5b1ea850264590d96d058d137f9aaeb33ac0c6a",
+  "pins" : [
+    {
+      "identity" : "matchedtext",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jaywardell/MatchedText",
+      "state" : {
+        "revision" : "a865746af098c6e6cce7804381dd4ee61daa3212",
+        "version" : "0.1.5"
+      }
+    },
+    {
+      "identity" : "visualdebugging",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jaywardell/VisualDebugging",
+      "state" : {
+        "revision" : "8e03ef0f7872cfddbae28cf17f92f5f610e10fd1",
+        "version" : "0.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}

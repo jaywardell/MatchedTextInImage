@@ -17,12 +17,22 @@ let package = Package(
         .library(
             name: "MatchedTextInImage",
             targets: ["MatchedTextInImage"]),
+    ], dependencies: [
+        // Here we define our package's external dependencies
+        // and from where they can be fetched:
+        .package(
+            url: "https://github.com/jaywardell/MatchedText",
+            .upToNextMajor(from: "0.1.5")
+        ),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "MatchedTextInImage"),
-
+            name: "MatchedTextInImage",
+            dependencies: [
+                .product(name: "MatchedText", package: "MatchedText"),
+            ]
+        )
     ]
 )
