@@ -11,7 +11,7 @@ struct ImageWithHighlightedText: View {
     
     let image: CGImage
     let highlighted: String
-    let highlight: (_ context: inout GraphicsContext,
+    let obscure: (_ context: inout GraphicsContext,
                     _ targetRect: CGRect,
                     _ imageSize: CGSize) -> Void
         
@@ -23,7 +23,7 @@ struct ImageWithHighlightedText: View {
          highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void) {
         self.image = image
         self.highlighted = highlighted
-        self.highlight = highlight
+        self.obscure = highlight
     }
     
     private var matchingTextRegions: [TextFromImageReader.TextRegion] {
@@ -67,7 +67,7 @@ struct ImageWithHighlightedText: View {
             else {
                 // otherwise blurry and desaturated
                 backgroundContext.clip(to: Path(targetRect))
-                highlight(&backgroundContext, targetRect, image.size)
+                obscure(&backgroundContext, targetRect, image.size)
                 backgroundContext.draw(swiftUIImage, in: targetRect)
             }
                         
@@ -117,7 +117,7 @@ extension ImageWithHighlightedText {
         guard let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         self.image = cgImage
         self.highlighted = highlighted
-        self.highlight = highlight
+        self.obscure = highlight
     }
     #elseif canImport(UIKit)
     init?(uiImage: UIImage, highlighted: String, highlight: @escaping (_ context: inout GraphicsContext,
@@ -149,7 +149,7 @@ extension ImageWithHighlightedText {
 // MARK: -
 
 #Preview {
-    ImageWithHighlightedText("bernie", highlighted: "at", highlight: MatchedTextInImage.defaultHighlight)
+    ImageWithHighlightedText("bernie", highlighted: "at", highlight: MatchedTextInImage.defaultObscureImage(_:_:_:))
         .padding()
         .padding(.bottom)
 }
