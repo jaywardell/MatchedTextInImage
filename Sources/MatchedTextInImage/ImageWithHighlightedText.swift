@@ -20,7 +20,7 @@ struct ImageWithHighlightedText: View {
     
     init(image: CGImage,
          highlighted: String,
-         highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void = Self.defaultHighlight) {
+         highlight: @escaping (_: inout GraphicsContext, _: CGRect, _: CGSize) -> Void) {
         self.image = image
         self.highlighted = highlighted
         self.highlight = highlight
@@ -110,16 +110,6 @@ struct ImageWithHighlightedText: View {
 // MARK: -
 
 extension ImageWithHighlightedText {
-    static func defaultHighlight(_ context: inout GraphicsContext,
-                                 _ targetRect: CGRect,
-                                 _ imageSize: CGSize) -> Void {
-        context.addFilter(.grayscale(1))
-    }
-}
-
-// MARK: -
-
-extension ImageWithHighlightedText {
     
     #if canImport(AppKit)
     init?(nsImage: NSImage, highlighted: String,
@@ -132,7 +122,7 @@ extension ImageWithHighlightedText {
     #elseif canImport(UIKit)
     init?(uiImage: UIImage, highlighted: String, highlight: @escaping (_ context: inout GraphicsContext,
                                                              _ targetRect: CGRect,
-                                                             _ imageSize: CGSize) -> Void = Self.defaultHighlight) {
+                                                             _ imageSize: CGSize) -> Void) {
         guard let cgImage = uiImage.cgImage else { return nil }
         self.image = cgImage
         self.highlighted = highlighted
@@ -159,7 +149,7 @@ extension ImageWithHighlightedText {
 // MARK: -
 
 #Preview {
-    ImageWithHighlightedText("bernie", highlighted: "at", highlight: ImageWithHighlightedText.defaultHighlight)
+    ImageWithHighlightedText("bernie", highlighted: "at", highlight: MatchedTextInImage.defaultHighlight)
         .padding()
         .padding(.bottom)
 }
