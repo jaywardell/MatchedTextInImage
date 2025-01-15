@@ -43,7 +43,6 @@ struct ImageWithHighlightedText: View {
             image: image,
             regions: matchingTextRegions?.map(\.rect) ?? [],
             highlighted: highlighted,
-            foundText: foundText,
             outlineRegions: true,
             obscure: obscure,
             highlight: { _, _, _ in }

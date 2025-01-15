@@ -12,7 +12,6 @@ struct ImageWithHighlightedRegions: View {
     let image: CGImage
     let regions: [CGRect]
     let highlighted: String
-    let foundText: [String]
     let outlineRegions: Bool
     let obscure: (_ context: inout GraphicsContext,
                     _ targetRect: CGRect,
@@ -21,7 +20,7 @@ struct ImageWithHighlightedRegions: View {
                     _ targetRect: CGRect,
                     _ imageSize: CGSize) -> Void
 
-    private var swiftUIImage: Image { Image(image, scale: 1, orientation: .up, label: Text(foundText.joined(separator: " "))) }
+    private var swiftUIImage: Image { Image(image, scale: 1, orientation: .up, label: Text("")) }
 
     private func outsetRect(for rect: CGRect) -> CGRect {
         let outset = rect.height * 0.1
